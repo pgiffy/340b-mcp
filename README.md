@@ -6,8 +6,11 @@ A Model Context Protocol (MCP) server that provides access to 340B drug informat
 
 - **Get Related NDCs**: Find related National Drug Codes for drugs
 - **RxNorm Information**: Get detailed drug information using RxCUI
-- **340B Eligibility Check**: Check if drugs are eligible for 340B pricing
+- **340B Eligibility Check**: Check if drugs are eligible for 340B pricing (uses real ESP database)
 - **Approximate Drug Matching**: Find approximate matches for drug names
+- **Batch RxNorm Processing**: Process multiple drug names for RxNorm matches
+- **Batch 340B Processing**: Process multiple NDC codes for 340B eligibility
+- **Automatic Data Refresh**: Updates 340B data from ESP database every 24 hours
 
 ## Quick Start
 
@@ -23,6 +26,19 @@ make build
 
 ### 2. Setup for Claude Code
 
+#### Option A: Using Claude MCP Command (Recommended)
+```bash
+# Build the server first
+make build
+
+# Register the MCP server with Claude Code
+claude mcp add 340b-drugs /Users/petergifford/340b-mcp/cmd/server/server
+
+# Verify registration
+claude mcp list
+```
+
+#### Option B: Manual Configuration
 Add the following to your Claude Desktop configuration file:
 
 **Location**: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -133,6 +149,38 @@ Find approximate drug name matches using RxNorm API.
 }
 ```
 
+### 5. generate_rxnorm_excel
+Process multiple drug names and return RxNorm match results in Excel-like format.
+
+**Parameters:**
+- `drug_names` (required): JSON array of drug names to process
+
+**Example:**
+```json
+{
+  "tool": "generate_rxnorm_excel",
+  "parameters": {
+    "drug_names": "[\"aspirin\", \"ibuprofen\", \"acetaminophen\"]"
+  }
+}
+```
+
+### 6. is_340b_excel
+Process multiple NDC codes and return 340B eligibility results in Excel-like format.
+
+**Parameters:**
+- `ndc_codes` (required): JSON array of NDC codes to check
+
+**Example:**
+```json
+{
+  "tool": "is_340b_excel",
+  "parameters": {
+    "ndc_codes": "[\"0009-3542-02\", \"0074-3368-02\", \"0074-6451-02\"]"
+  }
+}
+```
+
 ## Development
 
 ### Build Commands
@@ -175,12 +223,15 @@ make clean
 This server connects to the following external APIs:
 - **RxNorm REST API**: `https://rxnav.nlm.nih.gov/REST/`
 - **RxTerms API**: For detailed drug information
+- **340B ESP Database**: `https://www.340besp.com/ndcs` (Excel format, auto-refreshed every 24 hours)
 
 ## Notes
 
-- The 340B eligibility checking is currently simplified and requires access to the ESP (Enhanced Supplement Package) database for full functionality
+- The 340B eligibility checking uses real data from the ESP (Enhanced Supplement Package) database
+- Excel/CSV data is automatically downloaded and cached on startup
+- Cache is refreshed every 24 hours to ensure up-to-date information
 - All API calls include proper error handling and timeouts
-- The server is stateless and can handle concurrent requests
+- The server handles concurrent requests with thread-safe caching
 
 ## License
 

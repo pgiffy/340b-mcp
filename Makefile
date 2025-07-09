@@ -3,6 +3,7 @@
 # Build the MCP server
 build:
 	go build -o cmd/server/server ./cmd/server
+	chmod +x cmd/server/server
 
 # Clean build artifacts
 clean:

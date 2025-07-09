@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "340b-drugs": {
+      "command": "./cmd/server/server",
+      "args": [],
+      "env": {
+        "MCP_TIMEOUT": "30000"
+      }
+    }
+  }
+}

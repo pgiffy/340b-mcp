@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "340b-drugs": {
+      "command": "/Users/petergifford/340b-mcp/cmd/server/server",
+      "args": []
+    }
+  }
+}
