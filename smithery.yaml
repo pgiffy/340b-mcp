@@ -1,0 +1,4 @@
+version: 1
+start:
+  command: ["./server"]
+  # MCP servers communicate via stdio, no port needed
