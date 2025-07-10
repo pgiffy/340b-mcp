@@ -1,4 +1,5 @@
 # 340B Drugs MCP Server
+[![smithery badge](https://smithery.ai/badge/@pgiffy/local-340b-mcp)](https://smithery.ai/server/@pgiffy/local-340b-mcp)
 
 A Model Context Protocol (MCP) server that provides access to 340B drug information and RxNorm API functionality. This server can be used with Claude Code, GitHub Copilot, and other MCP-compatible tools.
 
@@ -13,6 +14,14 @@ A Model Context Protocol (MCP) server that provides access to 340B drug informat
 - **Automatic Data Loading**: Downloads 340B data from ESP database on startup
 
 ## Quick Start
+
+### Installing via Smithery
+
+To install 340B Drugs Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@pgiffy/local-340b-mcp):
+
+```bash
+npx -y @smithery/cli install @pgiffy/local-340b-mcp --client claude
+```
 
 ### 1. Build the Server
 
