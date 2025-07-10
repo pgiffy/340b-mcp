@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: 340b-mcp-server
+    env: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8080
+    healthCheckPath: /health

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -51,7 +52,34 @@ func main() {
 	is340BExcelTool, is340BExcelHandler := CreateIs340BExcelTool()
 	s.AddTool(is340BExcelTool, is340BExcelHandler)
 
-	if err := server.ServeStdio(s); err != nil {
-		fmt.Fprintf(os.Stderr, "Server error: %v\n", err)
+	// Check if we're running in HTTP mode (has PORT env var) or stdio mode
+	if port := os.Getenv("PORT"); port != "" {
+		// HTTP mode for Render deployment
+		fmt.Fprintf(os.Stderr, "Starting HTTP MCP server on port %s\n", port)
+		
+		// Create HTTP MCP server
+		httpServer := server.NewStreamableHTTPServer(s,
+			server.WithEndpointPath("/mcp"),
+			server.WithStateLess(true), // Stateless for better scaling
+		)
+		
+		// Create HTTP multiplexer
+		mux := http.NewServeMux()
+		mux.Handle("/mcp", httpServer)
+		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("OK"))
+		})
+		
+		// Start HTTP server
+		if err := http.ListenAndServe(":"+port, mux); err != nil {
+			fmt.Fprintf(os.Stderr, "HTTP server error: %v\n", err)
+		}
+	} else {
+		// stdio mode for local development
+		fmt.Fprintln(os.Stderr, "Starting stdio MCP server...")
+		if err := server.ServeStdio(s); err != nil {
+			fmt.Fprintf(os.Stderr, "Server error: %v\n", err)
+		}
 	}
 }
