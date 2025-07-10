@@ -57,19 +57,21 @@ func main() {
 		// HTTP mode for Render deployment
 		fmt.Fprintf(os.Stderr, "Starting HTTP MCP server on port %s\n", port)
 		
-		// Create HTTP MCP server
-		httpServer := server.NewStreamableHTTPServer(s,
-			server.WithEndpointPath("/mcp"),
-			server.WithStateLess(true), // Stateless for better scaling
-		)
-		
 		// Create HTTP multiplexer
 		mux := http.NewServeMux()
-		mux.Handle("/mcp", httpServer)
+		
+		// Add health check endpoint
 		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("OK"))
 		})
+		
+		// Add MCP endpoint - use SSE server for HTTP transport
+		sseServer := server.NewSSEServer(s, 
+			server.WithSSEEndpoint("/mcp"),
+			server.WithMessageEndpoint("/mcp"),
+		)
+		mux.Handle("/mcp", sseServer)
 		
 		// Start HTTP server
 		if err := http.ListenAndServe(":"+port, mux); err != nil {

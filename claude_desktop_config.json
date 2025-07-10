@@ -1,16 +1,8 @@
 {
   "mcpServers": {
-    "340b-drugs-local": {
-      "command": "/Users/petergifford/340b-mcp/cmd/server/server",
-      "args": []
-    },
-    "340b-drugs-remote": {
-      "command": "npx",
-      "args": [
-        "@modelcontextprotocol/server-everything",
-        "--url",
-        "https://your-app-name.onrender.com/mcp"
-      ]
+    "340b-drugs": {
+      "url": "https://three40b-mcp-server.onrender.com/mcp",
+      "transport": "http"
     }
   }
 }
