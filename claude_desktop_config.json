@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "340b-drugs": {
-      "url": "https://three40b-mcp-server.onrender.com/mcp",
-      "transport": "http"
-    }
-  }
-}

@@ -66,12 +66,36 @@ func main() {
 			w.Write([]byte("OK"))
 		})
 		
-		// Add MCP endpoint - use SSE server for HTTP transport
-		sseServer := server.NewSSEServer(s, 
-			server.WithSSEEndpoint("/mcp"),
-			server.WithMessageEndpoint("/mcp"),
-		)
-		mux.Handle("/mcp", sseServer)
+		// Add MCP endpoint - simple JSON-RPC handler
+		mux.HandleFunc("/mcp", func(w http.ResponseWriter, r *http.Request) {
+			// Set CORS headers
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			w.Header().Set("Content-Type", "application/json")
+			
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			
+			if r.Method == "GET" {
+				// Return server info for GET requests
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"jsonrpc":"2.0","result":{"protocolVersion":"2024-11-05","capabilities":{"tools":{"listChanged":false},"prompts":{"listChanged":false},"resources":{"listChanged":false,"subscribe":false}},"serverInfo":{"name":"340b-drugs","version":"1.0.0"}}}`))
+				return
+			}
+			
+			if r.Method != "POST" {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+				return
+			}
+			
+			// For now, return a simple error response for POST requests
+			// This prevents the hanging issue
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"jsonrpc":"2.0","error":{"code":-32601,"message":"Method not implemented in HTTP mode. Please use stdio mode."},"id":null}`))
+		})
 		
 		// Start HTTP server
 		if err := http.ListenAndServe(":"+port, mux); err != nil {

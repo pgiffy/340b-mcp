@@ -10,7 +10,7 @@ A Model Context Protocol (MCP) server that provides access to 340B drug informat
 - **Approximate Drug Matching**: Find approximate matches for drug names
 - **Batch RxNorm Processing**: Process multiple drug names for RxNorm matches
 - **Batch 340B Processing**: Process multiple NDC codes for 340B eligibility
-- **Automatic Data Refresh**: Updates 340B data from ESP database every 24 hours
+- **Automatic Data Loading**: Downloads 340B data from ESP database on startup
 
 ## Quick Start
 
@@ -223,13 +223,12 @@ make clean
 This server connects to the following external APIs:
 - **RxNorm REST API**: `https://rxnav.nlm.nih.gov/REST/`
 - **RxTerms API**: For detailed drug information
-- **340B ESP Database**: `https://www.340besp.com/ndcs` (Excel format, auto-refreshed every 24 hours)
+- **340B ESP Database**: `https://www.340besp.com/ndcs` (Excel format, loaded on startup)
 
 ## Notes
 
 - The 340B eligibility checking uses real data from the ESP (Enhanced Supplement Package) database
 - Excel/CSV data is automatically downloaded and cached on startup
-- Cache is refreshed every 24 hours to ensure up-to-date information
 - All API calls include proper error handling and timeouts
 - The server handles concurrent requests with thread-safe caching
 

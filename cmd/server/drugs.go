@@ -10,7 +10,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/tealeg/xlsx/v3"
@@ -32,10 +31,8 @@ type NDCRecord struct {
 }
 
 var (
-	ndcCache     = make(map[string]NDCRecord)
-	ndcCacheMux  sync.RWMutex
-	lastUpdate   time.Time
-	updateTicker *time.Ticker
+	ndcCache    = make(map[string]NDCRecord)
+	ndcCacheMux sync.RWMutex
 )
 
 type NDCGroup struct {
@@ -363,7 +360,7 @@ func getRxInfo(rxcui string) (map[string]interface{}, error) {
 func check340BEligibility(ndc, rxcui, name string) (map[string]interface{}, error) {
 	result := map[string]interface{}{
 		"is_340b":     false,
-		"cache_info":  fmt.Sprintf("Last updated: %s", lastUpdate.Format("2006-01-02 15:04:05")),
+		"cache_info":  "Loaded on startup",
 	}
 	
 	var ndcsToCheck []string
@@ -440,27 +437,11 @@ func findApproximateMatch(term string, maxEntries int) (map[string]interface{}, 
 }
 
 func InitNDCCache() error {
-	if err := downloadAndProcessNDCs(); err != nil {
-		return err
-	}
-	
-	// Start the 24-hour refresh cycle
-	updateTicker = time.NewTicker(24 * time.Hour)
-	go func() {
-		for range updateTicker.C {
-			if err := downloadAndProcessNDCs(); err != nil {
-				fmt.Fprintf(os.Stderr, "Error updating NDC cache: %v\n", err)
-			}
-		}
-	}()
-	
-	return nil
+	return downloadAndProcessNDCs()
 }
 
 func StopNDCCache() {
-	if updateTicker != nil {
-		updateTicker.Stop()
-	}
+	// No cleanup needed for local-only version
 }
 
 func downloadAndProcessNDCs() error {
@@ -522,7 +503,6 @@ func downloadAndProcessNDCs() error {
 	
 	ndcCacheMux.Lock()
 	ndcCache = newCache
-	lastUpdate = time.Now()
 	ndcCacheMux.Unlock()
 	
 	fmt.Fprintf(os.Stderr, "NDC cache updated with %d records\n", len(newCache))
@@ -649,7 +629,7 @@ func generate340BExcel(ndcCodes []string) (map[string]interface{}, error) {
 		"success": true,
 		"results": results,
 		"total_processed": len(ndcCodes),
-		"cache_last_updated": lastUpdate.Format("2006-01-02 15:04:05"),
+		"cache_info": "Loaded on startup",
 		"note": "Excel-like data structure for 340B eligibility",
 	}, nil
 }
